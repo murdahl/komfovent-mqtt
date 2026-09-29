@@ -5,6 +5,8 @@ from enum import IntEnum
 # The controller reports a missing sensor as 0x8000
 NO_SENSOR = 0x8000
 
+REG_OPERATION_MODE = 5
+
 
 class OperationMode(IntEnum):
     STANDBY = 0
@@ -56,7 +58,7 @@ FIELDS = (
     Field("power", 1, convert=bool),
     Field("eco_mode", 3, convert=bool),
     Field("auto_mode", 4, convert=bool),
-    Field("operation_mode", 5, convert=_mode_name),
+    Field("operation_mode", REG_OPERATION_MODE, convert=_mode_name),
     Field("supply_temperature", 902, scale=0.1, signed=True),
     Field("extract_temperature", 903, scale=0.1, signed=True),
     Field("outdoor_temperature", 904, scale=0.1, signed=True),

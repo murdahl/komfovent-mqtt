@@ -1,6 +1,6 @@
 # komfovent-mqtt
 
-Publishes readings from a Komfovent ventilation unit (Domekt and others with a **C6 / C6M** controller) to MQTT, over Modbus TCP. It's read-only: it never writes to the unit.
+Publishes readings from a Komfovent ventilation unit (Domekt and others with a **C6 / C6M** controller) to MQTT, over Modbus TCP. It can also switch the operation mode from MQTT, if you turn that on.
 
 ## Run
 
@@ -41,6 +41,7 @@ Modbus TCP must be reachable on the unit (port 502). On the C6 it's on by defaul
 | `MQTT_PASSWORD`       |             | |
 | `MQTT_TOPIC_PREFIX`   | `komfovent` | |
 | `POLL_INTERVAL`       | `30`        | Seconds between reads |
+| `ENABLE_CONTROL`      | `false`     | `true` to accept commands on `komfovent/set/...`; otherwise the bridge never writes to the unit |
 | `LOG_LEVEL`           | `INFO`      | `DEBUG` logs every published state |
 
 ## Topics
@@ -84,6 +85,20 @@ Modbus TCP must be reachable on the unit (port 502). On the C6 it's on by defaul
 - **Units:** temperatures in °C; fans, heat exchanger, heater, filter clogging, efficiency and humidity in %; power in W; energy in kWh; absolute humidity in g/m³.
 - **`operation_mode`:** one of `standby`, `away`, `normal`, `intensive`, `boost`, `kitchen`, `fireplace`, `override`, `holiday` or `air_quality`.
 - **`panel_*`:** readings from the control panel's own sensors (panel 1). A value is `null` when the sensor is missing or out of range.
+
+## Control
+
+With `ENABLE_CONTROL=true`, the bridge subscribes to:
+
+| Topic                           | Payload |
+|---------------------------------|---------|
+| `komfovent/set/operation_mode`  | `away`, `normal`, `intensive` or `boost` |
+
+```sh
+mosquitto_pub -t komfovent/set/operation_mode -m intensive
+```
+
+The bridge polls right after each command, so `komfovent/state` shows the new mode within a second. The fans ramp up over a few seconds, so their new speed appears at the next regular poll. A manually set mode lasts until the unit's own schedule changes mode. Invalid commands are logged and ignored.
 
 ## Development
 

@@ -26,6 +26,13 @@ def test_overrides():
     assert config.poll_interval == 10
 
 
+@pytest.mark.parametrize(("value", "expected"), [("true", True), ("1", True), ("YES", True), ("false", False), ("", False)])
+def test_enable_control(value, expected):
+    config = Config.from_env({"KOMFOVENT_HOST": "x", "MQTT_HOST": "y", "ENABLE_CONTROL": value})
+
+    assert config.enable_control is expected
+
+
 def test_missing_required():
     with pytest.raises(ConfigError, match="KOMFOVENT_HOST, MQTT_HOST"):
         Config.from_env({})
